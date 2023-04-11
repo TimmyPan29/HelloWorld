@@ -1,0 +1,13 @@
+git status 
+git commit -m "name" //為此次存檔簽章
+git add. 把當前資料夾的檔案都從untrack ->track
+ctrl + Fn + e 複製
+shift + Fn + e 貼上
+git add 檔名.副檔名 加入進track
+git log 看存檔內容
+cd ..回上個資料夾
+cd \c\Users 去哪個資料夾
+ls 當前資料夾的所有檔案
+git remote add originMiaoMiao https://github.com/TimmyPan29/HelloWorld.git
+git push -u (-u就不用每次都要打分支)<主支名> master(master是妳當前資料夾的支名) //這一段是在講要把妳現在所處的當地資料夾(master)推到網路端的<主支名>底下
+要去control panel 憑證那邊新增 https://github.com 用戶名 密碼  其中密碼可以去github申請暫時token
