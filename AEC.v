@@ -1,3 +1,7 @@
+//注意result最後正負的誰減誰 見L189 
+//注意index需不需要-1 通常要到時脈圖去看 見L65 L71
+//特殊情況的測資 見L67 L68 L69
+//把不要的符號丟棄 見L159 L162 L172
 module AEC(clk, rst, ascii_in, ready, valid, result);
 
 // Input signal
@@ -18,7 +22,7 @@ reg [3:0] string_index=0,stack_index=0,data_index=0,result_index=0 ;
 reg [3:0] stack_order=0,data_order=0;
 reg [3:0] operation_order=0;
 reg [6:0] result_stack [15:0];
-reg [7:0] temp=0 ;
+
 
 localparam WAIT = 3'd0;
 localparam DATA_IN= 3'd1;
@@ -53,21 +57,21 @@ always @(*) begin
 			else next_state = DATA_IN ;
 		end
 		SORT: begin
-			if(stack_index>0 && ((data_stack[data_order]==8'd42|| data_stack[data_order]==8'd43 || data_stack[data_order]==8'd45) && stack[stack_index-1]==8'd42)) next_state = g_POP1;
-			else if(stack_index>0 && ((data_stack[data_order]==8'd43|| data_stack[data_order]==8'd45) && stack[stack_index-1]==8'd43)) next_state = g_POP1;
-			else if(stack_index>0 && ((data_stack[data_order]==8'd43|| data_stack[data_order]==8'd45) && stack[stack_index-1]==8'd45)) next_state = g_POP1;
-			else if(data_stack[data_order]==8'd41) next_state = r_POP2 ;
-			else if(data_stack[data_order]==8'd61) next_state = e_POP3 ;
+			if(stack_index>0 && ((data_stack[data_order]==7'd42|| data_stack[data_order]==7'd43 || data_stack[data_order]==7'd45) && stack[stack_index-1]==8'd42)) next_state = g_POP1;
+			else if(stack_index>0 && ((data_stack[data_order]==7'd43|| data_stack[data_order]==7'd45) && stack[stack_index-1]==7'd43)) next_state = g_POP1;
+			else if(stack_index>0 && ((data_stack[data_order]==7'd43|| data_stack[data_order]==7'd45) && stack[stack_index-1]==7'd45)) next_state = g_POP1;
+			else if(data_stack[data_order]==7'd41) next_state = r_POP2 ;
+			else if(data_stack[data_order]==7'd61) next_state = e_POP3 ;
 			else next_state = SORT;
 		end
 		g_POP1: begin
-			if(((stack[stack_index-1]==8'd42|| stack[stack_index-1]==8'd43 || stack[stack_index-1]==8'd45) && stack[stack_index-3]==8'd42)) next_state = g_POP1;
-			else if(((stack[stack_index-1]==8'd43|| stack[stack_index-1]==8'd45) && stack[stack_index-3]==8'd43)) next_state = g_POP1;
-			else if(((stack[stack_index-1]==8'd43|| stack[stack_index-1]==8'd45) && stack[stack_index-3]==8'd45)) next_state = g_POP1;
-			next_state = SORT ;
+			if((stack[stack_index-1]==7'd42|| stack[stack_index-1]==7'd43 || stack[stack_index-1]==7'd45) && stack[stack_index-3]==7'd42) next_state = g_POP1;
+			else if((stack[stack_index-1]==7'd43|| stack[stack_index-1]==7'd45) && stack[stack_index-3]==7'd43) next_state = g_POP1;
+			else if((stack[stack_index-1]==7'd43|| stack[stack_index-1]==7'd45) && stack[stack_index-3]==7'd45) next_state = g_POP1;
+			else next_state = SORT ;
 		end
 		r_POP2: begin
-			if(stack[stack_index]==8'd40) next_state = SORT ;
+			if(stack[stack_index-1]==7'd40) next_state = SORT ;
 			else next_state = r_POP2 ;
 		end
 		e_POP3: begin
@@ -133,7 +137,7 @@ always @(posedge clk) begin
 			data_index <= data_index +1 ;
 		end
 		SORT: begin
-			if((data_stack[data_order]>8'd47 && data_stack[data_order]<8'd58) || (data_stack[data_order]>8'd96 && data_stack[data_order]<8'd103)) begin
+			if((data_stack[data_order]>7'd47 && data_stack[data_order]<7'd58) || (data_stack[data_order]>7'd96 && data_stack[data_order]<7'd103)) begin
 			outputstring[string_index] <= data_stack[data_order];
 			data_order <= data_order+1 ;
 			string_index <= string_index+1;
@@ -152,10 +156,10 @@ always @(posedge clk) begin
 			stack_index <= stack_index-1;
 		end
 		r_POP2:begin
-			if (stack[stack_index-1]==8'd41) begin
+			if (stack[stack_index-1]==7'd41) begin 
 				stack_index <= stack_index-1;
 			end
-			else if (stack[stack_index-1]==8'd40) begin
+			else if (stack[stack_index-1]==7'd40) begin
 				stack_index <= stack_index-1 ;
 			end
 			else begin
@@ -165,7 +169,7 @@ always @(posedge clk) begin
 			end
 		end
 		e_POP3: begin
-			if (stack[stack_index-1]==8'd61) begin
+			if (stack[stack_index-1]==7'd61) begin
 				stack_index <= stack_index-1;
 			end
 			else begin
@@ -175,30 +179,30 @@ always @(posedge clk) begin
 			end
 		end
 		OPERATION: begin
-			if(outputstring[operation_order]==8'd42) begin
+			if(outputstring[operation_order]==7'd42) begin
 				result_stack[result_index-4'd2] <= result_stack[result_index-4'd2]*result_stack[result_index-4'd1];
 				operation_order <= operation_order +1 ;
 				result_index <= result_index-4'd1;
 			end
-			else if(outputstring[operation_order]==8'd43) begin
+			else if(outputstring[operation_order]==7'd43) begin
 				result_stack[result_index-4'd2] <= result_stack[result_index-4'd2]+result_stack[result_index-4'd1];
 				operation_order <= operation_order +1 ;
 				result_index <= result_index-4'd1;
 			end
-			else if(outputstring[operation_order]==8'd45) begin
+			else if(outputstring[operation_order]==7'd45) begin
 				result_stack[result_index-4'd2] <= (result_stack[result_index-4'd2]>result_stack[result_index-4'd1])?
 					result_stack[result_index-4'd2]-result_stack[result_index-4'd1]:
 					result_stack[result_index-4'd1]-result_stack[result_index-4'd2];
 				operation_order <= operation_order +1 ;
 				result_index <= result_index-4'd1;
 			end
-			else if(outputstring[operation_order]>8'd47 && outputstring[operation_order]<8'd58 ) begin
-				result_stack[result_index]<=outputstring[operation_order]-8'd48;
+			else if(outputstring[operation_order]>7'd47 && outputstring[operation_order]<7'd58 ) begin
+				result_stack[result_index]<=outputstring[operation_order]-7'd48;
 				operation_order <= operation_order+1;
 				result_index <= result_index+1 ;
 			end
-			else if (outputstring[operation_order]>8'd96 && outputstring[operation_order]<8'd103) begin
-				result_stack[result_index]<=outputstring[operation_order]-8'd87;
+			else if (outputstring[operation_order]>7'd96 && outputstring[operation_order]<7'd103) begin
+				result_stack[result_index]<=outputstring[operation_order]-7'd87;
 				operation_order <= operation_order+1;
 				result_index <= result_index+1 ;
 			end
@@ -219,14 +223,13 @@ always @(posedge clk) begin
 			stack_index <= 0;
 			string_index <= 0;
 			stack_order <= 0;
-			temp <= 0;
 			data_index <= 0;
 			data_order <= 0;
 			operation_order <=0;
 			result_index <= 0 ;
-			for(i=0;i<15;i=i+1) stack[i] <= 4'd15;
-			for(i=0;i<15;i=i+1) data_stack[i] <= 4'd15;
-			for(i=0;i<15;i=i+1) outputstring[i] <= 4'd15;
+			// for(i=0;i<15;i=i+1) stack[i] <= 4'd15;
+			// for(i=0;i<15;i=i+1) data_stack[i] <= 4'd15;
+			// for(i=0;i<15;i=i+1) outputstring[i] <= 4'd15;
 		end
 	endcase
 end
