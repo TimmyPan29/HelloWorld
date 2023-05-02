@@ -16,12 +16,11 @@ output reg [6:0] result;
 
 reg [2:0] state, next_state; // eight states at most 0~7
 reg [6:0] stack [15:0];
-reg [6:0] data_stack [15:0];
 reg [6:0] outputstring [15:0]; // 16 characters at mose 
 reg [3:0] string_index=0,stack_index=0,data_index=0,result_index=0 ;
 reg [3:0] stack_order=0,data_order=0;
 reg [3:0] operation_order=0;
-reg [6:0] result_stack [15:0];
+reg [6:0] data_stack_result_stack [15:0];
 
 
 localparam WAIT = 3'd0;
@@ -57,11 +56,11 @@ always @(*) begin
 			else next_state = DATA_IN ;
 		end
 		SORT: begin
-			if(stack_index>0 && ((data_stack[data_order]==7'd42|| data_stack[data_order]==7'd43 || data_stack[data_order]==7'd45) && stack[stack_index-1]==8'd42)) next_state = g_POP1;
-			else if(stack_index>0 && ((data_stack[data_order]==7'd43|| data_stack[data_order]==7'd45) && stack[stack_index-1]==7'd43)) next_state = g_POP1;
-			else if(stack_index>0 && ((data_stack[data_order]==7'd43|| data_stack[data_order]==7'd45) && stack[stack_index-1]==7'd45)) next_state = g_POP1;
-			else if(data_stack[data_order]==7'd41) next_state = r_POP2 ;
-			else if(data_stack[data_order]==7'd61) next_state = e_POP3 ;
+			if(stack_index>0 && ((data_stack_result_stack[data_order]==7'd42|| data_stack_result_stack[data_order]==7'd43 || data_stack_result_stack[data_order]==7'd45) && stack[stack_index-1]==8'd42)) next_state = g_POP1;
+			else if(stack_index>0 && ((data_stack_result_stack[data_order]==7'd43|| data_stack_result_stack[data_order]==7'd45) && stack[stack_index-1]==7'd43)) next_state = g_POP1;
+			else if(stack_index>0 && ((data_stack_result_stack[data_order]==7'd43|| data_stack_result_stack[data_order]==7'd45) && stack[stack_index-1]==7'd45)) next_state = g_POP1;
+			else if(data_stack_result_stack[data_order]==7'd41) next_state = r_POP2 ;
+			else if(data_stack_result_stack[data_order]==7'd61) next_state = e_POP3 ;
 			else next_state = SORT;
 		end
 		g_POP1: begin
@@ -101,11 +100,11 @@ end
 		// end
 		
 		// SORT: begin //sort才加data order
-			// if(data_stack[data_order-1]==8'd41) next_state = POP ;
-			// else if(data_stack[data_order-1]==8'd61) next_state = POP ;
-			// else if(stack_index>0 && stack[stack_index-1]==8'd42 && data_stack[data_order-1]>=8'd42  && data_stack[data_order-1]<=8'd45) next_state = POP;
-			// else if(stack_index>0 && stack[stack_index-1]==8'd43 && data_stack[data_order-1]>=8'd43  && data_stack[data_order-1]<=8'd45) next_state = POP;
-			// else if(stack_index>0 && stack[stack_index-1]==8'd45 && (data_stack[data_order-1]==8'd43||data_stack[data_order-1]==8'd45 )) next_state = POP;
+			// if(data_stack_result_stack[data_order-1]==8'd41) next_state = POP ;
+			// else if(data_stack_result_stack[data_order-1]==8'd61) next_state = POP ;
+			// else if(stack_index>0 && stack[stack_index-1]==8'd42 && data_stack_result_stack[data_order-1]>=8'd42  && data_stack_result_stack[data_order-1]<=8'd45) next_state = POP;
+			// else if(stack_index>0 && stack[stack_index-1]==8'd43 && data_stack_result_stack[data_order-1]>=8'd43  && data_stack_result_stack[data_order-1]<=8'd45) next_state = POP;
+			// else if(stack_index>0 && stack[stack_index-1]==8'd45 && (data_stack_result_stack[data_order-1]==8'd43||data_stack_result_stack[data_order-1]==8'd45 )) next_state = POP;
 			// else next_state = SORT ;
 		// end
 		
@@ -133,17 +132,17 @@ always @(posedge clk) begin
 
 	case(state)
 		DATA_IN:begin
-			data_stack[data_index] <= ascii_in ;
+			data_stack_result_stack[data_index] <= ascii_in ;
 			data_index <= data_index +1 ;
 		end
 		SORT: begin
-			if((data_stack[data_order]>7'd47 && data_stack[data_order]<7'd58) || (data_stack[data_order]>7'd96 && data_stack[data_order]<7'd103)) begin
-			outputstring[string_index] <= data_stack[data_order];
+			if((data_stack_result_stack[data_order]>7'd47 && data_stack_result_stack[data_order]<7'd58) || (data_stack_result_stack[data_order]>7'd96 && data_stack_result_stack[data_order]<7'd103)) begin
+			outputstring[string_index] <= data_stack_result_stack[data_order];
 			data_order <= data_order+1 ;
 			string_index <= string_index+1;
 			end
 			else begin
-				stack[stack_index] <= data_stack[data_order] ;
+				stack[stack_index] <= data_stack_result_stack[data_order] ;
 				data_order <= data_order+1 ;
 				stack_index <= stack_index+1;
 			end
@@ -180,41 +179,41 @@ always @(posedge clk) begin
 		end
 		OPERATION: begin
 			if(outputstring[operation_order]==7'd42) begin
-				result_stack[result_index-4'd2] <= result_stack[result_index-4'd2]*result_stack[result_index-4'd1];
+				data_stack_result_stack[result_index-4'd2] <= data_stack_result_stack[result_index-4'd2]*data_stack_result_stack[result_index-4'd1];
 				operation_order <= operation_order +1 ;
 				result_index <= result_index-4'd1;
 			end
 			else if(outputstring[operation_order]==7'd43) begin
-				result_stack[result_index-4'd2] <= result_stack[result_index-4'd2]+result_stack[result_index-4'd1];
+				data_stack_result_stack[result_index-4'd2] <= data_stack_result_stack[result_index-4'd2]+data_stack_result_stack[result_index-4'd1];
 				operation_order <= operation_order +1 ;
 				result_index <= result_index-4'd1;
 			end
 			else if(outputstring[operation_order]==7'd45) begin
-				result_stack[result_index-4'd2] <= (result_stack[result_index-4'd2]>result_stack[result_index-4'd1])?
-					result_stack[result_index-4'd2]-result_stack[result_index-4'd1]:
-					result_stack[result_index-4'd1]-result_stack[result_index-4'd2];
+				data_stack_result_stack[result_index-4'd2] <= (data_stack_result_stack[result_index-4'd2]>data_stack_result_stack[result_index-4'd1])?
+					data_stack_result_stack[result_index-4'd2]-data_stack_result_stack[result_index-4'd1]:
+					data_stack_result_stack[result_index-4'd1]-data_stack_result_stack[result_index-4'd2];
 				operation_order <= operation_order +1 ;
 				result_index <= result_index-4'd1;
 			end
 			else if(outputstring[operation_order]>7'd47 && outputstring[operation_order]<7'd58 ) begin
-				result_stack[result_index]<=outputstring[operation_order]-7'd48;
+				data_stack_result_stack[result_index]<=outputstring[operation_order]-7'd48;
 				operation_order <= operation_order+1;
 				result_index <= result_index+1 ;
 			end
 			else if (outputstring[operation_order]>7'd96 && outputstring[operation_order]<7'd103) begin
-				result_stack[result_index]<=outputstring[operation_order]-7'd87;
+				data_stack_result_stack[result_index]<=outputstring[operation_order]-7'd87;
 				operation_order <= operation_order+1;
 				result_index <= result_index+1 ;
 			end
 			else begin
-				result_stack[result_index]<=outputstring[operation_order];
+				data_stack_result_stack[result_index]<=outputstring[operation_order];
 				operation_order <= operation_order+1;
 				result_index <= result_index+1 ;
 			end
 		end	
 		OUT: begin
 			valid <= 1;
-			result <= result_stack[0] ;
+			result <= data_stack_result_stack[0] ;
 		end
 		
 		WAIT: begin
@@ -228,7 +227,7 @@ always @(posedge clk) begin
 			operation_order <=0;
 			result_index <= 0 ;
 			// for(i=0;i<15;i=i+1) stack[i] <= 4'd15;
-			// for(i=0;i<15;i=i+1) data_stack[i] <= 4'd15;
+			// for(i=0;i<15;i=i+1) data_stack_result_stack[i] <= 4'd15;
 			// for(i=0;i<15;i=i+1) outputstring[i] <= 4'd15;
 		end
 	endcase
